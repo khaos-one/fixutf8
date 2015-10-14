@@ -164,9 +164,18 @@ namespace fixutf8 {
                         if (!(0x80 <= arr[i + 1] && arr[i + 1] <= 0xBF)) {
                             // It's broken UTF8 character. In common case we cannot know what it originally was.
                             // So we replace them with a double dot (0x2E).
-                            arr[i] = 0x2E;
-                            arr[i + 1] = 0x2E;
-                            replacements += 2;
+                            for (var k = i; k < i + 1; k++) {
+                                // Non-ASCII char.
+                                if (arr[k] > 0x7F) {
+                                    arr[k] = 0x2E;
+                                }
+
+                                replacements++;
+                            }
+
+                            //arr[i] = 0x2E;
+                            //arr[i + 1] = 0x2E;
+                            //replacements += 2;
                         }
 
                         i += 2;
@@ -317,10 +326,10 @@ namespace fixutf8 {
                         }
 
                         output.Write(buffer, 0, j);
+                        Write($"\rProcessed {i:N0} of {fileLength:N0} bytes, replaced {replacements:N0} bytes.", ConsoleColor.Magenta);
+
                         i += read;
                         GC.Collect();
-
-                        Write($"\rProcessed {i:N0} of {fileLength:N0} bytes, replaced {replacements:N0} bytes.", ConsoleColor.Magenta);
                     }
                 }
             }
