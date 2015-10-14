@@ -179,11 +179,21 @@ namespace fixutf8 {
                                 replacements++;
                             } else if (!(0x80 <= arr[j] && arr[j] <= 0xBF)) {
                                 // It's broken UTF8 character. In common case we cannot know what it originally was.
-                                // So we replace them with a triple dot (0x2E).
-                                arr[i] = 0x2E;
-                                arr[i + 1] = 0x2E;
-                                arr[i + 2] = 0x2E;
-                                replacements += 3;
+                                // Do the lookup and replace all non-ascii chars in place of this UTF8 sequence.
+
+                                for (var k = i; k < i + 3; k++) {
+                                    // Non-ASCII char.
+                                    if (arr[k] > 0x7F) {
+                                        arr[k] = 0x2E;
+                                    }
+
+                                    replacements++;
+                                }
+
+                                //arr[i] = 0x2E;
+                                //arr[i + 1] = 0x2E;
+                                //arr[i + 2] = 0x2E;
+                                //replacements += 3;
                                 break;
                             }
                         }
@@ -192,19 +202,27 @@ namespace fixutf8 {
                     }
                     // 4-byte UTF8 char.
                     else if (0xF0 <= arr[i] && arr[i] <= 0xF7 && i + 3 < count) {
-                        for (var j = i + 1; j < i + 4; j++) {
+                        for (var j = i + 1; j < i + 3; j++) {
                             if (arr[j] == 0x3F) {
                                 arr[j] = 0x98;
                                 replacements++;
-                            }
-                            else if (!(0x80 <= arr[j] && arr[j] <= 0xBF)) {
+                            } else if (!(0x80 <= arr[j] && arr[j] <= 0xBF)) {
                                 // It's broken UTF8 character. In common case we cannot know what it originally was.
-                                // So we replace them with a 4 dots (0x2E).
-                                arr[i] = 0x2E;
-                                arr[i + 1] = 0x2E;
-                                arr[i + 2] = 0x2E;
-                                arr[i + 3] = 0x2E;
-                                replacements += 4;
+                                // Do the lookup and replace all non-ascii chars in place of this UTF8 sequence.
+
+                                for (var k = i; k < i + 4; k++) {
+                                    // Non-ASCII char.
+                                    if (arr[k] > 0x7F) {
+                                        arr[k] = 0x2E;
+                                    }
+
+                                    replacements++;
+                                }
+
+                                //arr[i] = 0x2E;
+                                //arr[i + 1] = 0x2E;
+                                //arr[i + 2] = 0x2E;
+                                //replacements += 3;
                                 break;
                             }
                         }
