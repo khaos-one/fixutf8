@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 
 namespace fixutf8 {
     class Program {
@@ -154,6 +155,9 @@ namespace fixutf8 {
                 var replacements = 0U;
 
                 for (var i = offset; i < count;) {
+                    //if (arr[i] == 0xD3 && arr[i + 1] == 0xEA) {
+                    //    ;
+                    //}
                     // 2-byte UTF8 char.
                     if (0xC0 <= arr[i] && arr[i] <= 0xDF && i + 1 < count) {
                         if (arr[i + 1] == 0x3F) {
@@ -164,7 +168,7 @@ namespace fixutf8 {
                         if (!(0x80 <= arr[i + 1] && arr[i + 1] <= 0xBF)) {
                             // It's broken UTF8 character. In common case we cannot know what it originally was.
                             // So we replace them with a double dot (0x2E).
-                            for (var k = i; k < i + 1; k++) {
+                            for (var k = i; k < i + 2; k++) {
                                 // Non-ASCII char.
                                 if (arr[k] > 0x7F) {
                                     arr[k] = 0x2E;
@@ -300,11 +304,14 @@ namespace fixutf8 {
 
                         if (read == -1) {
                             // We're done.
-                            fixed (byte* p = temp) {
-                                replacements += FixUtf8Cp1251(p, 0, temp.Length);
-                            }
+                            if (temp != null && temp.Length > 0) {
+                                fixed (byte* p = temp) {
+                                    replacements += FixUtf8Cp1251(p, 0, temp.Length);
+                                }
 
-                            output.Write(temp, 0, temp.Length);
+                                output.Write(temp, 0, temp.Length);
+                            }
+                            
                             break;
                         }
 
@@ -326,10 +333,11 @@ namespace fixutf8 {
                         }
 
                         output.Write(buffer, 0, j);
-                        Write($"\rProcessed {i:N0} of {fileLength:N0} bytes, replaced {replacements:N0} bytes.", ConsoleColor.Magenta);
 
                         i += read;
                         GC.Collect();
+
+                        Write($"\rProcessed {i:N0} of {fileLength:N0} bytes, replaced {replacements:N0} bytes.", ConsoleColor.Magenta);
                     }
                 }
             }
